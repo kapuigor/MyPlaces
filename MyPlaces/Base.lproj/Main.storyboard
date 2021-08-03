@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Root View Controller-->
+        <!--My Places-->
         <scene sceneID="I0Y-nK-Xku">
             <objects>
                 <tableViewController id="CkZ-Ir-tS4" customClass="MainViewController" customModule="MyPlaces" customModuleProvider="target" sceneMemberID="viewController">
@@ -30,7 +30,7 @@
                             <outlet property="delegate" destination="CkZ-Ir-tS4" id="VwP-8l-0mJ"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="3Np-nc-S5B"/>
+                    <navigationItem key="navigationItem" title="My Places" id="3Np-nc-S5B"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZR1-XE-0bQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -43,6 +43,12 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="san-Ck-IWa">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <textAttributes key="titleTextAttributes">
+                            <fontDescription key="fontDescription" name="Symbol" family="Symbol" pointSize="24"/>
+                        </textAttributes>
+                        <textAttributes key="largeTitleTextAttributes">
+                            <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="0.0"/>
+                        </textAttributes>
                     </navigationBar>
                     <connections>
                         <segue destination="CkZ-Ir-tS4" kind="relationship" relationship="rootViewController" id="CFR-ab-93C"/>
