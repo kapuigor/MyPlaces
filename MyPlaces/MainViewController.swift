@@ -6,52 +6,176 @@
 //
 
 import UIKit
+import RealmSwift
 
-class MainViewController: UITableViewController {
+class MainViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    let restaurantNames = ["McDonald's", "KFC", "TelePizza", "Шавермейстер",
-                           "Солнечный день", "O'Briens" ,"Peggy O'Niels",
-                           "Компания", "Baggins Coffee", "Yami Yami"]
+    private let searchController = UISearchController(searchResultsController: nil) // Передавая nil, сообщаем контроллеру поиска, что для отображения
+                                                                            // результата поиска хотим использоавть вью с основным контентом
+    private var places: Results<Place>! // Results - это автообновляемый тип контейнера, который возвращает запрашиваемые объекты.
+                                // Текущее состояние хранилища в текущем потоке. Работа с данными в реальном времени.
+    private var filteredPlaces: Results<Place>! // Массив с отфильтрованными записями
+    private var ascendingSorting = true // Сортировка по возрастанию "true". Для осртировки по убыванию меняем на "false"
+    // Переменная возвращает true, если строка поиска пустая
+    private var searchBarIsEmpty : Bool {
+        guard let text = searchController.searchBar.text else { return false }
+        return text.isEmpty
+    }
+    
+    // Когда строка поиска активирована и не является пустой, возвращает true
+    private var isFiltering: Bool {
+        return searchController.isActive && !searchBarIsEmpty
+    }
+
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var segmentedControl: UISegmentedControl!
+    @IBOutlet var reversedSortingButton: UIBarButtonItem!
+    
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-
+        places = realm.objects(Place.self) // Подставляем не объект, а тип данных Place.
+        
+        // Setup the search controller
+        searchController.searchResultsUpdater = self // Получателем информации об изменении текста в поисковой строке должен быть наш класс
+        searchController.obscuresBackgroundDuringPresentation = false // По умолочнию VC с результатами поиска не позволяет взаимодействовать
+                                                                      // с отображаемым контентом. Если false, то позволяет.
+        searchController.searchBar.placeholder = "Search"
+        navigationItem.searchController = searchController // Строка поиска интегрирована в navigation bar
+        definesPresentationContext = true // Позволяет опустить строку поиска при переходе на другой экран
     }
 
     // MARK: - Table view data source
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return restaurantNames.count
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if isFiltering {
+            return filteredPlaces.count // Кол-во элементов filteredPlaces
+        }
+        return places.isEmpty ? 0 : places.count // Проверка количества элементов коллекции.
     }
 
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CustomTableViewCell
 
-        cell.nameLabel?.text = restaurantNames[indexPath.row]
-        cell.imageOfPlace?.image = UIImage(named: restaurantNames[indexPath.row])
+        var place = Place()
+        
+        if isFiltering {
+            place = filteredPlaces[indexPath.row]
+        } else {
+            place = places[indexPath.row]
+        }
+
+        // Обращаемся к конкретному объекту из массива places.
+        cell.nameLabel.text = place.name
+        cell.locationLabel.text = place.location
+        cell.typeLabel.text = place.type
+        cell.imageOfPlace.image = UIImage(data: place.imageData!) // Опционал, т.к. данное свойство никогда не будет nul.
+        cell.ratingLabel.text = String(Int(place.rating)) + " ⭐️"
+
         cell.imageOfPlace?.layer.cornerRadius = cell.imageOfPlace.frame.size.height / 6
         cell.imageOfPlace?.clipsToBounds = true
 
         return cell
     }
+
+    // MARK: Table view delegate
     
-    // MARK: - Table view delegate
+    // Снимаем выделение с ячейки после выхода из экрана редактирования
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 85
+    // Сюда помещены все действия при свайпе по строке.
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let place = places[indexPath.row] // Удаляемый объект массива с индексом текущей строки
+        let deleteAction = UITableViewRowAction(style: .default, title: "Delete") { (_, _) in // Действие при свайпе. Меню удаления красное
+            
+            StorageManager.deleteObject(place) // Удаление объекта
+            tableView.deleteRows(at: [indexPath], with: .automatic) // Удаляем саму строку
+        }
+        
+        return [deleteAction] // Возвращаем данное действие как элемент массива
     }
 
 
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    //
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "showDetail" {
+            // Определяет индекс выбранной ячейки
+            guard let indexPath = tableView.indexPathForSelectedRow else { return } // Извлекаем опциональное значение
+            let place: Place
+            if isFiltering {
+                place = filteredPlaces[indexPath.row]
+            } else {
+                place = places[indexPath.row]
+            }
+            let newPlaceVC = segue.destination as! NewPlaceViewController // Создаем экземпляр VC
+            newPlaceVC.currentPlace = place // Передали объект с типом Place из выбранной ячейки на NewPlaceViewController
+        }
     }
-    */
+    
+    
+    @IBAction func unwindSegue(_ segue: UIStoryboardSegue) {
+        
+        // Возврат через source.
+        guard let newPlaceVC = segue.source as? NewPlaceViewController else { return }
+        
+        newPlaceVC.savePlace()
+        tableView.reloadData()
+    }
 
+    // Метод выбора сортировки
+    @IBAction func sortSelection(_ sender: UISegmentedControl) {
+        
+        sorting()
+    }
+    
+    //
+    @IBAction func reversedSorting(_ sender: Any) {
+        
+        ascendingSorting.toggle() // Меняет значение на противоположное
+        
+        // Меняем изображение кнопки
+        if ascendingSorting {
+            reversedSortingButton.image = #imageLiteral(resourceName: "AZ")
+        } else {
+            reversedSortingButton.image = #imageLiteral(resourceName: "ZA")
+        }
+        
+        sorting()
+    }
+    
+    // Метод сортировки
+    private func sorting() {
+        
+        // Если выбран нулевой сегмент, сортируем по дате
+        if segmentedControl.selectedSegmentIndex == 0 {
+            places = places.sorted(byKeyPath: "date", ascending: ascendingSorting) // По ключу "date" и значению ascendingSorting (true/false)
+        } else { // Иначе сортируем по имени
+            places = places.sorted(byKeyPath: "name", ascending: ascendingSorting) // По ключу "name" и значению ascendingSorting (true/false)
+        }
+        
+        tableView.reloadData() // Обновление таблицы
+    }
+}
+
+extension MainViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentForSearchText(searchController.searchBar.text!) // Даже если строка поиска будет пустой, она не будет nil. UISC информирует MVC, вызывая метод updateSearchResults,
+                                                                     // который будет вызывать filterContentForSearchText
+    }
+    
+    private func filterContentForSearchText(_ searchText: String) {
+        
+        filteredPlaces = places.filter("name CONTAINS[c] %@ OR location CONTAINS[c] %@", searchText, searchText) // [c] - не зависит от регистра символов. Выполняем поиск по полю name и                                                                                                             // location, фильтруем данные по параметру из значения searchText
+        
+        tableView.reloadData()
+    }
 }
