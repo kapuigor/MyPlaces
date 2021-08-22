@@ -163,38 +163,11 @@
                                                         </userDefinedRuntimeAttribute>
                                                     </userDefinedRuntimeAttributes>
                                                 </stackView>
-                                                <view contentMode="scaleToFill" placeholderIntrinsicWidth="149" placeholderIntrinsicHeight="34" translatesAutoresizingMaskIntoConstraints="NO" id="Mua-g0-2mG" customClass="CosmosView" customModule="Cosmos">
-                                                    <rect key="frame" x="132.5" y="53" width="149" height="34"/>
-                                                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="number" keyPath="starSize">
-                                                            <real key="value" value="30"/>
-                                                        </userDefinedRuntimeAttribute>
-                                                        <userDefinedRuntimeAttribute type="number" keyPath="rating">
-                                                            <real key="value" value="3"/>
-                                                        </userDefinedRuntimeAttribute>
-                                                        <userDefinedRuntimeAttribute type="number" keyPath="totalStars">
-                                                            <integer key="value" value="5"/>
-                                                        </userDefinedRuntimeAttribute>
-                                                        <userDefinedRuntimeAttribute type="image" keyPath="filledImage" value="filledStar"/>
-                                                        <userDefinedRuntimeAttribute type="image" keyPath="emptyImage" value="emptyStar"/>
-                                                        <userDefinedRuntimeAttribute type="number" keyPath="emptyBorderWidth">
-                                                            <real key="value" value="0.0"/>
-                                                        </userDefinedRuntimeAttribute>
-                                                    </userDefinedRuntimeAttributes>
-                                                </view>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="Mua-g0-2mG" firstAttribute="centerY" secondItem="iPw-bx-zKD" secondAttribute="centerY" id="F4t-Fx-qzL"/>
                                                 <constraint firstItem="KZP-mk-nMj" firstAttribute="centerY" secondItem="iPw-bx-zKD" secondAttribute="centerY" id="VeW-X7-hzt"/>
-                                                <constraint firstItem="Mua-g0-2mG" firstAttribute="centerX" secondItem="iPw-bx-zKD" secondAttribute="centerX" id="ivP-FE-RvK"/>
                                                 <constraint firstItem="KZP-mk-nMj" firstAttribute="centerX" secondItem="iPw-bx-zKD" secondAttribute="centerX" id="t6F-OL-tgH"/>
                                             </constraints>
-                                            <variation key="default">
-                                                <mask key="subviews">
-                                                    <exclude reference="KZP-mk-nMj"/>
-                                                </mask>
-                                            </variation>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </cells>
@@ -218,7 +191,6 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="cosmosView" destination="Mua-g0-2mG" id="nye-cJ-Mvn"/>
                         <outlet property="placeImage" destination="fuN-xh-K9e" id="Mi4-6d-zTi"/>
                         <outlet property="placeLocation" destination="4OY-Z1-Yhl" id="dYM-AI-cwf"/>
                         <outlet property="placeName" destination="Nth-iX-k9a" id="3kf-5M-jZz"/>
@@ -331,6 +303,12 @@
                                                 <mask key="subviews">
                                                     <exclude reference="jEP-OI-nGn"/>
                                                 </mask>
+                                                <mask key="constraints">
+                                                    <exclude reference="DMV-fu-3Uc"/>
+                                                    <exclude reference="PnL-3g-pyk"/>
+                                                    <exclude reference="jUC-Rh-SYH"/>
+                                                    <exclude reference="mv6-eP-Off"/>
+                                                </mask>
                                             </variation>
                                         </tableViewCellContentView>
                                         <connections>
@@ -441,9 +419,6 @@
     <designables>
         <designable name="KZP-mk-nMj">
             <size key="intrinsicContentSize" width="252" height="44"/>
-        </designable>
-        <designable name="Mua-g0-2mG">
-            <size key="intrinsicContentSize" width="149" height="34"/>
         </designable>
         <designable name="t2a-87-Ude">
             <size key="intrinsicContentSize" width="90" height="14"/>
