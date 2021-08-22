@@ -53,20 +53,14 @@ class MainViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if isFiltering {
             return filteredPlaces.count // Кол-во элементов filteredPlaces
         }
-        return places.isEmpty ? 0 : places.count // Проверка количества элементов коллекции.
+        return places.count // Проверка количества элементов коллекции.
     }
 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CustomTableViewCell
-
-        var place = Place()
-        
-        if isFiltering {
-            place = filteredPlaces[indexPath.row]
-        } else {
-            place = places[indexPath.row]
-        }
+     
+        let place = isFiltering ? filteredPlaces[indexPath.row] : places[indexPath.row]
 
         // Обращаемся к конкретному объекту из массива places.
         cell.nameLabel.text = place.name
@@ -74,9 +68,7 @@ class MainViewController: UIViewController, UITableViewDataSource, UITableViewDe
         cell.typeLabel.text = place.type
         cell.imageOfPlace.image = UIImage(data: place.imageData!) // Опционал, т.к. данное свойство никогда не будет nul.
         cell.ratingLabel.text = String(Int(place.rating)) + " ⭐️"
-
-        cell.imageOfPlace?.layer.cornerRadius = cell.imageOfPlace.frame.size.height / 6
-        cell.imageOfPlace?.clipsToBounds = true
+        cell.cosmosView.rating = place.rating
 
         return cell
     }
@@ -109,12 +101,7 @@ class MainViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if segue.identifier == "showDetail" {
             // Определяет индекс выбранной ячейки
             guard let indexPath = tableView.indexPathForSelectedRow else { return } // Извлекаем опциональное значение
-            let place: Place
-            if isFiltering {
-                place = filteredPlaces[indexPath.row]
-            } else {
-                place = places[indexPath.row]
-            }
+            let place = isFiltering ? filteredPlaces[indexPath.row] : places[indexPath.row]
             let newPlaceVC = segue.destination as! NewPlaceViewController // Создаем экземпляр VC
             newPlaceVC.currentPlace = place // Передали объект с типом Place из выбранной ячейки на NewPlaceViewController
         }
