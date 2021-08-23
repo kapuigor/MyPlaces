@@ -23,7 +23,7 @@ class CustomTableViewCell: UITableViewCell {
     @IBOutlet weak var ratingLabel: UILabel!
     @IBOutlet var cosmosView: CosmosView! {
         didSet {
-            cosmosView.settings.updateOnTouch = false
+            cosmosView.settings.updateOnTouch = false // Не обновляет рейтинг на MVC при нажатии на рейтинг
         }
     }
     
