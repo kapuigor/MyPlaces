@@ -80,23 +80,26 @@ class MainViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    // Сюда помещены все действия при свайпе по строке.
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+    // Сюда помещены все действия при свайпе по строке
+    // Fixed "'UITableViewRowAction' was deprecated in iOS 13.0: Use UIContextualAction and related APIs instead."
+    // Added trailingSwipeActionsConfigurationRowAt in UISwipeActionsConfiguration
+    private func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         let place = places[indexPath.row] // Удаляемый объект массива с индексом текущей строки
-        let deleteAction = UITableViewRowAction(style: .default, title: "Delete") { (_, _) in // Действие при свайпе. Меню удаления красное
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (contextualAction, view, boolValue) in // Действие при свайпе. Меню удаления красное
             
             StorageManager.deleteObject(place) // Удаление объекта
             tableView.deleteRows(at: [indexPath], with: .automatic) // Удаляем саму строку
         }
         
-        return [deleteAction] // Возвращаем данное действие как элемент массива
+        let swipeAction = UISwipeActionsConfiguration(actions: [deleteAction])
+        
+        return swipeAction // Возвращаем данное действие как элемент массива
     }
 
 
     // MARK: - Navigation
 
-    //
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             // Определяет индекс выбранной ячейки
