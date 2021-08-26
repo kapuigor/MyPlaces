@@ -73,18 +73,33 @@ class NewPlaceViewController: UITableViewController {
             view.endEditing(true) // Конец редактирования.
         }
     }
+    
+    // MARK: Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        // Если получается извлечь segue.identifier и создать экземпляр класса MapViewController
+        guard
+            let identifier = segue.identifier,
+            let mapVC = segue.destination as? MapViewController
+        else { return }
+
+        mapVC.incomeSegueIdentifier = identifier
+        mapVC.mapViewControllerDelegate = self // Объявляем текущий класс делегатом
+        
+        if identifier == "showPlace" {
+            mapVC.place.name = placeName.text! // Передаем текущее заведение на MVC
+            mapVC.place.location = placeLocation.text
+            mapVC.place.type = placeType.text
+            mapVC.place.imageData = placeImage.image?.pngData()
+        }
+    }
 
     
     // Передаем данные заполненных полей в соответствующие свойства нашей модели.
     func savePlace() {
         
-        var image: UIImage?
-        
-        if imageIsChanged {
-            image = placeImage.image // Либо выбранное изображение.
-        } else {
-            image = #imageLiteral(resourceName: "imagePlaceholder") // Либо изображение по умолчанию.
-        }
+        let image = imageIsChanged ? placeImage.image : #imageLiteral(resourceName: "imagePlaceholder") // Либо выбранное изображение / либо изображение по умолчанию
         
         let imageData = image?.pngData()
         
@@ -193,5 +208,12 @@ extension NewPlaceViewController: UIImagePickerControllerDelegate, UINavigationC
         imageIsChanged = true
         
         dismiss(animated: true)
+    }
+}
+
+extension NewPlaceViewController: MapViewControllerDelegate {
+    
+    func getAddress(_ address: String?) { // address уже содержит значение выбранного адреса
+        placeLocation.text = address // Передаем значение выбранного адреса в поле location
     }
 }
